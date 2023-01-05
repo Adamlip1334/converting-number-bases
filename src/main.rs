@@ -3,21 +3,34 @@ use std::process;
 
 #[macro_use]
 extern crate clap;
+extern crate num_bigint;
 
+use num_bigint::BigInt;
 
-fn base_to_decimal(base: u32, number: &str) -> u32 {
-    u32::from_str_radix(number, base).unwrap()
+fn anybase_to_anybase(input_base: u32, output_base: u32, number: &str) -> String {
+    let decimal = BigInt::parse_bytes(number.as_bytes(), input_base).unwrap();
+    decimal.to_str_radix(output_base)
 }
+
+
 
 fn main() {
     let matches = App::new("Base Converter")
         .arg(
-            Arg::with_name("base")
-                .short("b")
-                .long("base")
+            Arg::with_name("input_base")
+                .short("i")
+                .long("input-base")
                 .required(true)
                 .takes_value(true)
-                .help("The base of the number"),
+                .help("The base of the input number"),
+        )
+        .arg(
+            Arg::with_name("output_base")
+                .short("o")
+                .long("output-base")
+                .required(true)
+                .takes_value(true)
+                .help("The base of the output number"),
         )
         .arg(
             Arg::with_name("number")
@@ -26,12 +39,16 @@ fn main() {
         )
         .get_matches();
 
-    let base = value_t!(matches, "base", u32).unwrap_or_else(|e| {
+    let input_base = value_t!(matches, "input_base", u32).unwrap_or_else(|e| {
+        eprintln!("Error: {}", e);
+        process::exit(1);
+    });
+    let output_base = value_t!(matches, "output_base", u32).unwrap_or_else(|e| {
         eprintln!("Error: {}", e);
         process::exit(1);
     });
     let number = matches.value_of("number").unwrap();
 
-    let decimal = base_to_decimal(base, number);
-    println!("{} (base {}) = {} (base 10)", number, base, decimal);
+    let result = anybase_to_anybase(input_base, output_base, number);
+    println!("{} (base {}) = {} (base {})", number, input_base, result, output_base);
 }
