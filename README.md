@@ -1,6 +1,5 @@
 # Base Converter
-A simple command-line tool that converts a number in any base to a number in any other base.
-Requirements
+A command-line program for converting numbers between any two bases between 2 and 64.
 
     Rust 1.47 or later
     
@@ -44,5 +43,5 @@ FF (base 16) = 255 (base 10)
 Limitations
 
 * Can only handle positive integers.
-* Can only handle input bases between 2 and 36.
-* Can only handle output bases between 2 and 36.
+* Can only handle input bases between 2 and 64.
+* Can only handle output bases between 2 and 64.
