@@ -7,11 +7,20 @@ extern crate num_bigint;
 
 use num_bigint::BigInt;
 
-fn anybase_to_anybase(input_base: u32, output_base: u32, number: &str) -> String {
-    let decimal = BigInt::parse_bytes(number.as_bytes(), input_base).unwrap();
-    decimal.to_str_radix(output_base)
-}
+fn anybase_to_anybase(input_base: u32, output_base: u32, number: &str) -> Result<String, String> {
+    // Validate the input number
+    if !number.chars().all(|c| {
+        c.is_digit(input_base) ||
+        (input_base > 10 && c.is_alphabetic()) ||
+        (input_base == 62 && c.is_ascii_punctuation()) ||
+        (input_base == 64 && c.is_ascii_punctuation())
+    }) {
+        return Err(format!("Invalid number for base {}: {}", input_base, number));
+    }
 
+    let decimal = BigInt::parse_bytes(number.as_bytes(), input_base).unwrap();
+    Ok(decimal.to_str_radix(output_base))
+}
 
 
 fn main() {
@@ -50,5 +59,9 @@ fn main() {
     let number = matches.value_of("number").unwrap();
 
     let result = anybase_to_anybase(input_base, output_base, number);
-    println!("{} (base {}) = {} (base {})", number, input_base, result, output_base);
+    match result {
+        Ok(output) => println!("{} (base {}) = {} (base {})", number, input_base, output, output_base),
+        Err(error) => println!("Error: {}", error),
+    }
+
 }
